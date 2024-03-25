@@ -44,6 +44,39 @@ func CreateUser(c *gin.Context) {
 	// 	return
 	// }
 
+	if User.Email == "" || User.Password == "" || User.UserName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "bad request",
+			"message": "email or password or username can't be empty",
+		})
+		return
+	}
+
+	if User.Age < 8 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "bad request",
+			"message": "minimal age is 8",
+		})
+		return
+	}
+
+	pw := []rune(User.Password)
+	if len(pw) < 6 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "bad request",
+			"message": "password too short",
+		})
+		return
+	}
+
+	if errem := helpers.EmailValidator(User.Email); errem !=  nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "bad request",
+			"message": "invalid email",
+		})
+		return
+	}
+
 	err := db.Debug().Create(&User).Error
 
 	if err != nil {
